@@ -13,7 +13,7 @@
         }
     ],
     "require": {
-    	  "php": ">=5.3.0",
+    	"php": ">=5.3.0",
         "composer-plugin-api": "~1.0.0"
     },
     "autoload": {
@@ -22,9 +22,9 @@
         }
     },
     "extra" : {
-    	  "class": ["Mouf\\NodeJsInstaller\\NodeJsPlugin"],
-	      "mouf": {
-		        "logo": "node-js.png"
-	      }
+    	"class": ["Mouf\\NodeJsInstaller\\NodeJsPlugin"],
+	    "mouf": {
+		      "logo": "node-js.png"
+	    }
     }
 }
