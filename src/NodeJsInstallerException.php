@@ -1,7 +1,6 @@
 <?php
 namespace Mouf\NodeJsInstaller;
 
-
-class NodeJsInstallerException extends \Exception {
-
+class NodeJsInstallerException extends \Exception
+{
 }

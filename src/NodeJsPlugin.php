@@ -1,16 +1,12 @@
 <?php
 namespace Mouf\NodeJsInstaller;
 
-
 use Composer\Composer;
 use Composer\Script\Event;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use Composer\Plugin\PluginEvents;
-use Composer\Plugin\PreFileDownloadEvent;
 use Composer\Script\ScriptEvents;
-use Composer\Util\RemoteFilesystem;
 
 /**
  * This class is the entry point for the NodeJs plugin.
@@ -18,9 +14,8 @@ use Composer\Util\RemoteFilesystem;
  *
  * @author David Négrier
  */
-class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
-
-
+class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
+{
 
     protected $composer;
 
@@ -33,27 +28,27 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
     {
         $this->composer = $composer;
         $this->io = $io;
-
     }
-
 
     /**
      * Let's register the harmony dependencies update events.
      *
      * @return array
      */
-    public static function getSubscribedEvents() {
+    public static function getSubscribedEvents()
+    {
         return array(
             ScriptEvents::POST_AUTOLOAD_DUMP => array(
-                array('postAutoloadDump', 0)
-            )
+                array('postAutoloadDump', 0),
+            ),
         );
     }
 
     /**
      * Script callback; Acted on after autoload dump.
      */
-    public function postAutoloadDump(Event $event) {
+    public function postAutoloadDump(Event $event)
+    {
         $settings = array(
             'version' => '0.12.0',
             'minimumVersion' => '0.8.0',
@@ -84,16 +79,17 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
             $this->verboseLog(" - No global NodeJS install found");
             $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion']);
         }
-
     }
 
-    private function verboseLog($message) {
+    private function verboseLog($message)
+    {
         if ($this->io->isVerbose()) {
             $this->io->write($message);
         }
     }
 
-    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $version, $minimumVersion) {
+    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $version, $minimumVersion)
+    {
         $localVersion = $nodeJsInstaller->getNodeJsLocalInstallVersion();
         if ($localVersion !== null) {
             $this->verboseLog(" - Local NodeJS install found: v".$localVersion);
@@ -110,11 +106,12 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
     /**
      * Downloads and extracts the package, only if the URL to download has not been downloaded before.
      *
-     * @param PackageInterface $package
+     * @param  PackageInterface          $package
      * @throws \RuntimeException
      * @throws \UnexpectedValueException
      */
-    private function downloadAndExtractFile(PackageInterface $package) {
+    private function downloadAndExtractFile(PackageInterface $package)
+    {
         $extra = $package->getExtra();
         if (isset($extra['url'])) {
             $url = $extra['url'];
@@ -147,8 +144,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
                 throw new \RuntimeException('You must enable the openssl extension to download files via https');
             }
 
-
-            $this->io->write("    - Downloading <info>" . $fileName . "</info> from <info>".$url."</info>");
+            $this->io->write("    - Downloading <info>".$fileName."</info> from <info>".$url."</info>");
 
             $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $fileName);
 
@@ -159,10 +155,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
 
             // Extract using ZIP downloader
             if ($extension == 'zip') {
-                $this->io->write("    - Extracting <info>" . $fileName . "</info>");
+                $this->io->write("    - Extracting <info>".$fileName."</info>");
                 $this->extractZip($fileName, $targetDir, $omitFirstDirectory);
             } elseif ($extension == 'tar' || $extension == 'gz' || $extension == 'bz2') {
-                $this->io->write("    - Extracting <info>" . $fileName . "</info>");
+                $this->io->write("    - Extracting <info>".$fileName."</info>");
                 $this->extractTgz($fileName, $targetDir, $omitFirstDirectory);
             }
 
@@ -193,15 +189,16 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
     /**
      * Returns the URL of the last file that this install process ever downloaded.
      *
-     * @param PackageInterface $package
+     * @param  PackageInterface $package
      * @return string
      */
-    public static function getLastDownloadedFileUrl(PackageInterface $package) {
+    public static function getLastDownloadedFileUrl(PackageInterface $package)
+    {
         $packageDir = self::getPackageDir($package);
         if (file_exists($packageDir."download-status.txt")) {
             return file_get_contents($packageDir."download-status.txt");
         } else {
-            return null;
+            return;
         }
     }
 
@@ -209,9 +206,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
      * Saves the URL of the last file that this install process downloaded into a file for later retrieval.
      *
      * @param PackageInterface $package
-     * @param unknown $url
+     * @param unknown          $url
      */
-    public static function setLastDownloadedFileUrl(PackageInterface $package, $url) {
+    public static function setLastDownloadedFileUrl(PackageInterface $package, $url)
+    {
         $packageDir = self::getPackageDir($package);
         file_put_contents($packageDir."download-status.txt", $url);
     }
@@ -219,18 +217,19 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
     /**
      * Returns the package directory, with a trailing /
      *
-     * @param PackageInterface $package
+     * @param  PackageInterface $package
      * @return string
      */
-    public static function getPackageDir(PackageInterface $package) {
+    public static function getPackageDir(PackageInterface $package)
+    {
         return __DIR__."/../../../../../".$package->getName()."/";
     }
 
     /**
      * Extract ZIP (copied from Composer's ZipDownloader)
      *
-     * @param string $file
-     * @param string $path
+     * @param  string                    $file
+     * @param  string                    $path
      * @throws \RuntimeException
      * @throws \UnexpectedValueException
      */
@@ -262,13 +261,14 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
      * This is useful if you want to extract a ZIP file that contains all the content stored
      * in one directory and that you don't want this directory.
      *
-     * @param unknown $zipArchive
-     * @param unknown $path
+     * @param  unknown    $zipArchive
+     * @param  unknown    $path
      * @throws \Exception
      */
-    protected function extractIgnoringFirstDirectory($zipArchive, $path) {
-        for( $i = 0; $i < $zipArchive->numFiles; $i++ ){
-            $stat = $zipArchive->statIndex( $i );
+    protected function extractIgnoringFirstDirectory($zipArchive, $path)
+    {
+        for ($i = 0; $i < $zipArchive->numFiles; $i++) {
+            $stat = $zipArchive->statIndex($i);
 
             $filename = $stat['name'];
 
@@ -285,7 +285,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface {
             }
 
             $fp = $zipArchive->getStream($filename);
-            if	(!$fp) {
+            if (!$fp) {
                 throw new \Exception("Unable to read file $filename from archive.");
             }
 

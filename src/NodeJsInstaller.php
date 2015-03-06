@@ -5,14 +5,13 @@
  * Date: 06/03/15
  * Time: 17:01
  */
-
 namespace Mouf\NodeJsInstaller;
-
 
 use Composer\IO\IOInterface;
 use Composer\Util\RemoteFilesystem;
 
-class NodeJsInstaller {
+class NodeJsInstaller
+{
 
     /**
      * @var IOInterface
@@ -27,7 +26,6 @@ class NodeJsInstaller {
         $this->rfs = new RemoteFilesystem($io);
     }
 
-
     /**
      * Checks if NodeJS is installed globally.
      * If yes, will return the version number.
@@ -37,13 +35,14 @@ class NodeJsInstaller {
      *
      * @return null|string
      */
-    public function getNodeJsGlobalInstallVersion() {
+    public function getNodeJsGlobalInstallVersion()
+    {
         $returnCode = 0;
         $output = "";
         $version = exec("nodejs -v", $output, $returnCode);
 
         if ($returnCode != 0) {
-            return null;
+            return;
         } else {
             return ltrim($version, "v");
         }
@@ -58,7 +57,8 @@ class NodeJsInstaller {
      *
      * @return null|string
      */
-    public function getNodeJsLocalInstallVersion() {
+    public function getNodeJsLocalInstallVersion()
+    {
         $returnCode = 0;
         $output = "";
 
@@ -78,7 +78,7 @@ class NodeJsInstaller {
         chdir($cwd);
 
         if ($returnCode != 0) {
-            return null;
+            return;
         } else {
             return ltrim($version, "v");
         }
@@ -87,32 +87,37 @@ class NodeJsInstaller {
     /**
      * @return bool True if OS is Windows.
      */
-    private function isWindows() {
+    private function isWindows()
+    {
         return defined('PHP_WINDOWS_VERSION_BUILD');
     }
 
     /**
      * @return bool True if OS is MacOSX.
      */
-    private function isMacOS() {
+    private function isMacOS()
+    {
         return PHP_OS === 'Darwin';
     }
 
     /**
      * @return bool True if OS is SunOS.
      */
-    private function isSunOS() {
+    private function isSunOS()
+    {
         return PHP_OS === 'SunOS';
     }
 
     /**
      * @return bool True if OS is Linux.
      */
-    private function isLinux() {
+    private function isLinux()
+    {
         return PHP_OS === 'Linux';
     }
 
-    public function getNodeJSUrl($version) {
+    public function getNodeJSUrl($version)
+    {
         if ($this->isWindows() && $this->getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node.exe";
         } elseif ($this->isWindows() && $this->getArchitecture() == 64) {
@@ -137,7 +142,8 @@ class NodeJsInstaller {
     /**
      * @return int Returns 32 or 64 depending on supported architecture.
      */
-    public function getArchitecture() {
+    public function getArchitecture()
+    {
         return 8 * PHP_INT_SIZE;
     }
 
@@ -145,7 +151,8 @@ class NodeJsInstaller {
      * Installs NodeJS
      * @param $version
      */
-    public function install($version) {
+    public function install($version)
+    {
         $this->io->write("Installing <info>NodeJS v".$version."</info>");
         $url = $this->getNodeJSUrl($version);
         $this->io->write("  Downloading from $url");
@@ -162,8 +169,6 @@ class NodeJsInstaller {
                 .' directory is writable and you have internet connectivity');
         }
 
-
-
         // Now, if we are not in Windows, let's untar.
         if (!$this->isWindows()) {
             mkdir('vendor/nodejs/nodejs', 0775, true);
@@ -173,7 +178,6 @@ class NodeJsInstaller {
             $archive->extractTo('vendor/nodejs/nodejs', null, true);
 
             // TODO: it seems the links are not kept in bin/npm
-
         } else {
             // If we are in Windows, let's move and install NPM.
             // TODO
