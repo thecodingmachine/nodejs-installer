@@ -254,6 +254,13 @@ class NodeJsInstaller
         $cwd = getcwd();
         chdir(__DIR__.'/../../../../');
 
+        if (!file_exists($binDir)) {
+            $result = mkdir($binDir, 0775, true);
+            if ($result === false) {
+                throw new NodeJsInstallerException("Unable to create directory ".$binDir);
+            }
+        }
+
         $fullTargetDir = realpath($targetDir);
 
         if (!$this->isWindows()) {
