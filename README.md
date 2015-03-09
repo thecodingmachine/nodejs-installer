@@ -1,46 +1,62 @@
-NodeJS installer
-================
+NodeJS installer for Composer
+=============================
 
-This is a simple installer that let's you create simple Composer packages that are actually downloading and extracting an archive from the web.
+This is an installer that will download NodeJS and NPM install them in your Composer dependencies.
+Installation is skipped if NodeJS is already available on your machine.
 
-Downloading an archive from the web is actually already possible in Composer using the ["package" repository](http://getcomposer.org/doc/05-repositories.md#package-2), but this approach has a number of drawbacks. For instance, you cannot unpack the package in the root directory, or you cannot build dependencies easily upon that package.
+How does it work?
+-----------------
 
-Using the archive installer, you can let Composer install big packages that have no Composer package for you. For instance, you can build a Drupal installer just by writing a composer.json file.
+Simply include this package in your *composer.json* requirements:
 
-A package implementing the archive installer should contain at least these statements in *composer.json*:
+```json
+{
+    "require": {
+        "mouf/nodejs-installer": "~1.0",
+    }
+}
+```
+
+By default, if NodeJS is not available on your computer, it will be downloaded and installed in *vendor/nodejs/nodejs*.
+
+You should access NodeJS and NPM using the scripts created into the *vendor/bin* directory:
+
+- *vendor/bin/node* (*vendor/bin/node.bat* in Windows)
+- *vendor/bin/npm* (*vendor/bin/npm.bat* in Windows)
+
+Options
+-------
+
+A number of options are available to customize NodeJS installation:
 
 
-	{
-		...
-		"type": "archive-package",
-		...
-		"extra": {
-			"url": "http://exemple.com/myarchive.zip"
-			"target-dir": "destination/directory",
-			"omit-first-directory": "true|false"
-		}
-	}
+```json
+{
+    "require": {
+        "mouf/nodejs-installer": "~1.0",
+    },
+    "extra": {
+    	"mouf": {
+    		"nodejs": {
+    			"version": "0.12.0",
+                "minimumVersion": "0.8.0",
+                "targetDir": "vendor/nodejs/nodejs"
+    		}
+    	}
+    }
+}
+```
 
-Please note that *target-dir* is relative to the root of your project (the directory containing the *composer.json* file).
-If *target-dir* is omitted, we default to the package's directory.
+Available options:
 
+- **version**: This is the **exact** version number of the NodeJS version that will be downloaded and installed.
+  In the current version, you *cannot* specify version ranges ("~0.12" or ">0.11" is *unsupported*).  
+  *Default value: 0.12.0* 
+- **minimumVersion**: Before downloading NodeJS, the installer will check the availability of NodeJS globally.
+  If a NodeJS is available globally, the *minimumVersion* parameter is the minimum version NodeJS should have.
+  If this condition is not met, a local install is performed.  
+  *Default value: 0.8.0*
+- **targetDir**: The target directory NodeJS will be installed in. Relative to project root.  
+  *Default value: vendor/nodejs/nodejs*
 
-The *omit-first-directory* is useful if you download an archive where all the files are contained in one big directory. If you want the files without the container directory, just pass *true* to the *omit-first-directory* parameter (it defaults to false).
-
-Detailed behaviour
-------------------
-
-The archive installer is not a perfect implementation. Actually, it is kind of stupid. Here is what you might want to know:
-
-It assumes that the downloaded file at the URL you pass will never change. Once a download and installation is performed, it will not download the file again, unless the URL changes.
-If the URL changes, it will download the new archive and overwrite any previous files.
-
-If you uninstall the package, the downloaded files will not be removed (it is up to you to do the cleanup).
-
-Working in team
----------------
-
-You might wonder whether you should commit the downloaded files in your code repository or not.
-
-Actually, it's up to you. You might want to let the other users run *composer install* to download the package, or you might as well commit the files.
-If you commit the files, we strongly suggest that you also commit the *download-status.txt* file too, that you can find at the root of your package. This way, when your team-mates will run *composer install*, the package will not be downloaded again. Of course, the opposite is equally true: if you do not commit the downloaded package, then you should not commit *download-status.txt*.
+**Note**: in the current implementation, options are only read from the "root" package.

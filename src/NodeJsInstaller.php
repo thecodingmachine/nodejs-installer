@@ -149,9 +149,11 @@ class NodeJsInstaller
 
     /**
      * Installs NodeJS
-     * @param $version
+     * @param string $version
+     * @param string $targetDirectory
+     * @throws NodeJsInstallerException
      */
-    public function install($version)
+    public function install($version, $targetDirectory, $binDir)
     {
         $this->io->write("Installing <info>NodeJS v".$version."</info>");
         $url = $this->getNodeJSUrl($version);
@@ -171,22 +173,94 @@ class NodeJsInstaller
 
         // Now, if we are not in Windows, let's untar.
         if (!$this->isWindows()) {
-            mkdir('vendor/nodejs/nodejs', 0775, true);
+            if (!file_exists($targetDirectory)) {
+                mkdir($targetDirectory, 0775, true);
+            }
 
-            // Can throw an UnexpectedValueException
-            $archive = new \PharData($fileName);
-            $archive->extractTo('vendor/nodejs/nodejs', null, true);
+            if (!is_writable($targetDirectory)) {
+                throw new NodeJsInstallerException("'$targetDirectory' is not writable");
+            }
 
-            // TODO: it seems the links are not kept in bin/npm
+            $this->extractTo($fileName, $targetDirectory);
         } else {
             // If we are in Windows, let's move and install NPM.
             // TODO
             throw new \Exception("Not implemented yet!");
         }
 
-        chdir($cwd);
-
         // Let's delete the downloaded file.
         unlink($fileName);
+
+        // Now, let's create the bin scripts that start node and NPM
+        $this->createBinScripts($binDir, $targetDirectory);
+
+        chdir($cwd);
+    }
+
+    /**
+     * Extract tar.gz file to target directory.
+     *
+     * @param string $tarGzFile
+     * @param string $targetDir
+     */
+    private function extractTo($tarGzFile, $targetDir) {
+        // Note: we cannot use PharData class because it does not keeps symbolic links.
+        // Also, --strip 1 allows us to remove the first directory.
+
+        $output = $return_var = null;
+
+        exec("tar -xvf ".$tarGzFile." -C ".escapeshellarg($targetDir)." --strip 1", $output, $return_var);
+
+        if ($return_var != 0) {
+            throw new NodeJsInstallerException("An error occurred while untaring NodeJS ($tarGzFile) to $targetDir");
+        }
+    }
+
+    private function createBinScripts($binDir, $targetDir) {
+        $fullTargetDir = realpath($targetDir);
+
+        $content = file_get_contents(__DIR__.'/../bin/node');
+        $path = $this->makePathRelative($fullTargetDir, $binDir);
+        file_put_contents($binDir.'/node', sprintf($content, $path));
+        chmod($binDir.'/node', 0755);
+
+        $content = file_get_contents(__DIR__.'/../bin/npm');
+        $path = $this->makePathRelative($fullTargetDir, $binDir);
+        file_put_contents($binDir.'/npm', sprintf($content, $path));
+        chmod($binDir.'/npm', 0755);
+    }
+
+    /**
+     * Shamelessly stolen from Symfony's FileSystem. Thanks guys!
+     * Given an existing path, convert it to a path relative to a given starting path.
+     *
+     * @param string $endPath   Absolute path of target
+     * @param string $startPath Absolute path where traversal begins
+     *
+     * @return string Path of target relative to starting path
+     */
+    private function makePathRelative($endPath, $startPath)
+    {
+        // Normalize separators on Windows
+        if ('\\' === DIRECTORY_SEPARATOR) {
+            $endPath = strtr($endPath, '\\', '/');
+            $startPath = strtr($startPath, '\\', '/');
+        }
+        // Split the paths into arrays
+        $startPathArr = explode('/', trim($startPath, '/'));
+        $endPathArr = explode('/', trim($endPath, '/'));
+        // Find for which directory the common path stops
+        $index = 0;
+        while (isset($startPathArr[$index]) && isset($endPathArr[$index]) && $startPathArr[$index] === $endPathArr[$index]) {
+            $index++;
+        }
+        // Determine how deep the start path is relative to the common path (ie, "web/bundles" = 2 levels)
+        $depth = count($startPathArr) - $index;
+        // Repeated "../" for each level need to reach the common path
+        $traverser = str_repeat('../', $depth);
+        $endPathRemainder = implode('/', array_slice($endPathArr, $index));
+        // Construct $endPath from traversing to the common path, then to the remaining $endPath
+        $relativePath = $traverser.(strlen($endPathRemainder) > 0 ? $endPathRemainder.'/' : '');
+        return (strlen($relativePath) === 0) ? './' : $relativePath;
     }
 }
