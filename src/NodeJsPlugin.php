@@ -52,7 +52,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $settings = array(
             'version' => '0.12.0',
             'minimumVersion' => '0.8.0',
-            'targetDir' => 'vendor/nodejs/nodejs'
+            'targetDir' => 'vendor/nodejs/nodejs',
         );
 
         $extra = $event->getComposer()->getPackage()->getExtra();
@@ -78,15 +78,15 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
 
             if (version_compare($globalVersion, $settings['minimumVersion']) === -1) {
-                $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir'], $binDir);
+                $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
                 $isLocal = true;
             }
         } else {
             $this->verboseLog(" - No global NodeJS install found");
-            $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir'], $binDir);
+            $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
             $isLocal = true;
         }
-        
+
         // Now, let's create the bin scripts that start node and NPM
         $nodeJsInstaller->createBinScripts($binDir, $settings['targetDir'], $isLocal);
     }
@@ -98,18 +98,18 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
-    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $version, $minimumVersion, $targetDir, $binDir)
+    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $version, $minimumVersion, $targetDir)
     {
         $localVersion = $nodeJsInstaller->getNodeJsLocalInstallVersion();
         if ($localVersion !== null) {
             $this->verboseLog(" - Local NodeJS install found: v".$localVersion);
 
             if (version_compare($localVersion, $minimumVersion) === -1) {
-                $nodeJsInstaller->install($version, $targetDir, $binDir);
+                $nodeJsInstaller->install($version, $targetDir);
             }
         } else {
             $this->verboseLog(" - No local NodeJS install found");
-            $nodeJsInstaller->install($version, $targetDir, $binDir);
+            $nodeJsInstaller->install($version, $targetDir);
         }
     }
 

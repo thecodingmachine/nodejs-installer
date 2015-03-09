@@ -33,20 +33,21 @@ class NodeJsInstaller
     {
         $returnCode = 0;
         $output = "";
-        
+
         ob_start();
         $version = exec("nodejs -v 2>&1", $output, $returnCode);
         ob_end_clean();
 
         if ($returnCode !== 0) {
-        	ob_start();
-        	$version = exec("node -v 2>&1", $output, $returnCode);
-        	ob_end_clean();
-        	
-        	if ($returnCode !== 0) {
-            	return;
-        	}
+            ob_start();
+            $version = exec("node -v 2>&1", $output, $returnCode);
+            ob_end_clean();
+
+            if ($returnCode !== 0) {
+                return;
+            }
         }
+
         return ltrim($version, "v");
     }
 
@@ -151,11 +152,11 @@ class NodeJsInstaller
 
     /**
      * Installs NodeJS
-     * @param string $version
-     * @param string $targetDirectory
+     * @param  string                   $version
+     * @param  string                   $targetDirectory
      * @throws NodeJsInstallerException
      */
-    public function install($version, $targetDirectory, $binDir)
+    public function install($version, $targetDirectory)
     {
         $this->io->write("Installing <info>NodeJS v".$version."</info>");
         $url = $this->getNodeJSUrl($version);
@@ -175,54 +176,53 @@ class NodeJsInstaller
         }
 
         if (!file_exists($targetDirectory)) {
-        	mkdir($targetDirectory, 0775, true);
+            mkdir($targetDirectory, 0775, true);
         }
-        
+
         if (!is_writable($targetDirectory)) {
-        	throw new NodeJsInstallerException("'$targetDirectory' is not writable");
+            throw new NodeJsInstallerException("'$targetDirectory' is not writable");
         }
-        
-        
+
         if (!$this->isWindows()) {
             // Now, if we are not in Windows, let's untar.
-        	$this->extractTo($fileName, $targetDirectory);
-        	
-        	// Let's delete the downloaded file.
-        	unlink($fileName);
+            $this->extractTo($fileName, $targetDirectory);
+
+            // Let's delete the downloaded file.
+            unlink($fileName);
         } else {
             // If we are in Windows, let's move and install NPM.
             rename($fileName, $targetDirectory.'/'.basename($fileName));
-        	
+
             // We have to download the latest available version in a bin for Windows, then upgrade it:
             $url = "http://nodejs.org/dist/npm/npm-1.4.12.zip";
             $npmFileName = "vendor/npm-1.4.12.zip";
             $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $npmFileName);
-            
+
             $this->unzip($npmFileName, $targetDirectory);
-            
+
             unlink($npmFileName);
-            
-			// Let's update NPM
-            // 1- Update PATH to run npm. 
+
+            // Let's update NPM
+            // 1- Update PATH to run npm.
             $path = getenv('PATH');
             $newPath = realpath($targetDirectory).";".$path;
             putenv('PATH='.$newPath);
-            
+
             // 2- Run npm
             $cwd2 = getcwd();
             chdir($targetDirectory);
-            
+
             $returnCode = 0;
             passthru("npm update npm", $returnCode);
             if ($returnCode !== 0) {
-            	throw new NodeJsInstallerException("An error occurred while updating NPM to latest version.");
+                throw new NodeJsInstallerException("An error occurred while updating NPM to latest version.");
             }
-            
+
             // Finally, let's copy the base npm file for Cygwin
             if (file_exists('node_modules/npm/bin/npm')) {
-            	copy('node_modules/npm/bin/npm', 'npm');
+                copy('node_modules/npm/bin/npm', 'npm');
             }
-            
+
             chdir($cwd2);
         }
 
@@ -235,7 +235,8 @@ class NodeJsInstaller
      * @param string $tarGzFile
      * @param string $targetDir
      */
-    private function extractTo($tarGzFile, $targetDir) {
+    private function extractTo($tarGzFile, $targetDir)
+    {
         // Note: we cannot use PharData class because it does not keeps symbolic links.
         // Also, --strip 1 allows us to remove the first directory.
 
@@ -248,20 +249,21 @@ class NodeJsInstaller
         }
     }
 
-    public function createBinScripts($binDir, $targetDir, $isLocal) {
-    	$cwd = getcwd();
-    	chdir(__DIR__.'/../../../../');
-    	
+    public function createBinScripts($binDir, $targetDir, $isLocal)
+    {
+        $cwd = getcwd();
+        chdir(__DIR__.'/../../../../');
+
         $fullTargetDir = realpath($targetDir);
 
         if (!$this->isWindows()) {
-        	$this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
-        	$this->createBinScript($binDir, $fullTargetDir, 'npm', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'npm', $isLocal);
         } else {
-        	$this->createBinScript($binDir, $fullTargetDir, 'node.bat', $isLocal);
-        	$this->createBinScript($binDir, $fullTargetDir, 'npm.bat', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'node.bat', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'npm.bat', $isLocal);
         }
-        
+
         chdir($cwd);
     }
 
@@ -270,13 +272,14 @@ class NodeJsInstaller
      * @param string $binDir
      * @param string $fullTargetDir
      * @param string $scriptName
-     * @param bool $isLocal
+     * @param bool   $isLocal
      */
-    private function createBinScript($binDir, $fullTargetDir, $scriptName, $isLocal) {
-    	$content = file_get_contents(__DIR__.'/../bin/'.($isLocal?"local/":"global/").$scriptName);
-    	$path = $this->makePathRelative($fullTargetDir, $binDir);
-    	file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
-    	chmod($binDir.'/'.$scriptName, 0755);
+    private function createBinScript($binDir, $fullTargetDir, $scriptName, $isLocal)
+    {
+        $content = file_get_contents(__DIR__.'/../bin/'.($isLocal ? "local/" : "global/").$scriptName);
+        $path = $this->makePathRelative($fullTargetDir, $binDir);
+        file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
+        chmod($binDir.'/'.$scriptName, 0755);
     }
 
     /**
@@ -310,18 +313,20 @@ class NodeJsInstaller
         $endPathRemainder = implode('/', array_slice($endPathArr, $index));
         // Construct $endPath from traversing to the common path, then to the remaining $endPath
         $relativePath = $traverser.(strlen($endPathRemainder) > 0 ? $endPathRemainder.'/' : '');
+
         return (strlen($relativePath) === 0) ? './' : $relativePath;
     }
-    
-    private function unzip($zipFileName, $targetDir) {
-    	$zip = new \ZipArchive();
-    	$res = $zip->open($zipFileName);
-    	if ($res === TRUE) {
-    		// extract it to the path we determined above
-    		$zip->extractTo($targetDir);
-    		$zip->close();
-    	} else {
-    		throw new NodeJsInstallerException("Unable to extract file $zipFileName");
-    	}
+
+    private function unzip($zipFileName, $targetDir)
+    {
+        $zip = new \ZipArchive();
+        $res = $zip->open($zipFileName);
+        if ($res === true) {
+            // extract it to the path we determined above
+            $zip->extractTo($targetDir);
+            $zip->close();
+        } else {
+            throw new NodeJsInstallerException("Unable to extract file $zipFileName");
+        }
     }
 }
