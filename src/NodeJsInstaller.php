@@ -226,9 +226,6 @@ class NodeJsInstaller
             chdir($cwd2);
         }
 
-        // Now, let's create the bin scripts that start node and NPM
-        $this->createBinScripts($binDir, $targetDirectory);
-
         chdir($cwd);
     }
 
@@ -251,16 +248,21 @@ class NodeJsInstaller
         }
     }
 
-    private function createBinScripts($binDir, $targetDir) {
+    public function createBinScripts($binDir, $targetDir, $isLocal) {
+    	$cwd = getcwd();
+    	chdir(__DIR__.'/../../../../');
+    	
         $fullTargetDir = realpath($targetDir);
 
         if (!$this->isWindows()) {
-        	$this->createBinScript($binDir, $fullTargetDir, 'node');
-        	$this->createBinScript($binDir, $fullTargetDir, 'npm');
+        	$this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
+        	$this->createBinScript($binDir, $fullTargetDir, 'npm', $isLocal);
         } else {
-        	$this->createBinScript($binDir, $fullTargetDir, 'node.bat');
-        	$this->createBinScript($binDir, $fullTargetDir, 'npm.bat');
+        	$this->createBinScript($binDir, $fullTargetDir, 'node.bat', $isLocal);
+        	$this->createBinScript($binDir, $fullTargetDir, 'npm.bat', $isLocal);
         }
+        
+        chdir($cwd);
     }
 
     /**
@@ -268,9 +270,10 @@ class NodeJsInstaller
      * @param string $binDir
      * @param string $fullTargetDir
      * @param string $scriptName
+     * @param bool $isLocal
      */
-    private function createBinScript($binDir, $fullTargetDir, $scriptName) {
-    	$content = file_get_contents(__DIR__.'/../bin/'.$scriptName);
+    private function createBinScript($binDir, $fullTargetDir, $scriptName, $isLocal) {
+    	$content = file_get_contents(__DIR__.'/../bin/'.($isLocal?"local/":"global/").$scriptName);
     	$path = $this->makePathRelative($fullTargetDir, $binDir);
     	file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
     	chmod($binDir.'/'.$scriptName, 0755);

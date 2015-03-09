@@ -73,16 +73,22 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $nodeJsInstaller = new NodeJsInstaller($this->io);
 
         $globalVersion = $nodeJsInstaller->getNodeJsGlobalInstallVersion();
+        $isLocal = false;
         if ($globalVersion !== null) {
             $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
 
             if (version_compare($globalVersion, $settings['minimumVersion']) === -1) {
                 $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir'], $binDir);
+                $isLocal = true;
             }
         } else {
             $this->verboseLog(" - No global NodeJS install found");
             $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir'], $binDir);
+            $isLocal = true;
         }
+        
+        // Now, let's create the bin scripts that start node and NPM
+        $nodeJsInstaller->createBinScripts($binDir, $settings['targetDir'], $isLocal);
     }
 
     private function verboseLog($message)
