@@ -40,7 +40,8 @@ A number of options are available to customize NodeJS installation:
     		"nodejs": {
     			"version": "0.12.0",
                 "minimumVersion": "0.8.0",
-                "targetDir": "vendor/nodejs/nodejs"
+                "targetDir": "vendor/nodejs/nodejs",
+                "forceLocal": false
     		}
     	}
     }
@@ -58,5 +59,8 @@ Available options:
   *Default value: 0.8.0*
 - **targetDir**: The target directory NodeJS will be installed in. Relative to project root.  
   *Default value: vendor/nodejs/nodejs*
+- **forceLocal** (boolean): If set to true, NodeJS will always be downloaded and installed locally, even if NodeJS
+  is already available on your computer.
+  *Default value: false*
 
 **Note**: in the current implementation, options are only read from the "root" package.

@@ -53,6 +53,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             'version' => '0.12.0',
             'minimumVersion' => '0.8.0',
             'targetDir' => 'vendor/nodejs/nodejs',
+            'forceLocal' => false
         );
 
         $extra = $event->getComposer()->getPackage()->getExtra();
@@ -72,19 +73,27 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
         $nodeJsInstaller = new NodeJsInstaller($this->io);
 
-        $globalVersion = $nodeJsInstaller->getNodeJsGlobalInstallVersion();
         $isLocal = false;
-        if ($globalVersion !== null) {
-            $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
 
-            if (version_compare($globalVersion, $settings['minimumVersion']) === -1) {
+        if ($settings['forceLocal']) {
+            $this->verboseLog(" - Forcing local NodeJS install.");
+            $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
+            $isLocal = true;
+        } else {
+            $globalVersion = $nodeJsInstaller->getNodeJsGlobalInstallVersion();
+
+            if ($globalVersion !== null) {
+                $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
+
+                if (version_compare($globalVersion, $settings['minimumVersion']) === -1) {
+                    $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
+                    $isLocal = true;
+                }
+            } else {
+                $this->verboseLog(" - No global NodeJS install found");
                 $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
                 $isLocal = true;
             }
-        } else {
-            $this->verboseLog(" - No global NodeJS install found");
-            $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
-            $isLocal = true;
         }
 
         // Now, let's create the bin scripts that start node and NPM
