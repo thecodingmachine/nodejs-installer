@@ -98,6 +98,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
         // Now, let's create the bin scripts that start node and NPM
         $nodeJsInstaller->createBinScripts($binDir, $settings['targetDir'], $isLocal);
+
+        // Finally, let's register vendor/bin in the PATH.
+        $nodeJsInstaller->registerPath($binDir);
     }
 
     private function verboseLog($message)

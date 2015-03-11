@@ -64,3 +64,6 @@ Available options:
   *Default value: false*
 
 **Note**: in the current implementation, options are only read from the "root" package.
+
+After the plugin is run in Composer, the *vendor/bin* directory is added to the PATH. Therefore, a plugin running
+after this plugin can access node and npm without specifying the full path to *vendor/bin*.

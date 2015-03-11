@@ -336,4 +336,19 @@ class NodeJsInstaller
             throw new NodeJsInstallerException("Unable to extract file $zipFileName");
         }
     }
+
+    /**
+     * Adds the vendor/bin directory into the path.
+     * Note: the vendor/bin is prepended in order to be applied BEFORE an existing install of node.
+     *
+     * @param string $binDir
+     */
+    public function registerPath($binDir) {
+        $path = getenv('PATH');
+        if ($this->isWindows()) {
+            putenv('PATH='.realpath($binDir).';'.$path);
+        } else {
+            putenv('PATH='.realpath($binDir).':'.$path);
+        }
+    }
 }
