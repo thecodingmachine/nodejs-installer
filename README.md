@@ -38,8 +38,7 @@ A number of options are available to customize NodeJS installation:
     "extra": {
     	"mouf": {
     		"nodejs": {
-    			"version": "0.12.0",
-                "minimumVersion": "0.8.0",
+    			"version": "~0.12",
                 "targetDir": "vendor/nodejs/nodejs",
                 "forceLocal": false
     		}
@@ -50,13 +49,9 @@ A number of options are available to customize NodeJS installation:
 
 Available options:
 
-- **version**: This is the **exact** version number of the NodeJS version that will be downloaded and installed.
-  In the current version, you *cannot* specify version ranges ("~0.12" or ">0.11" is *unsupported*).  
-  *Default value: 0.12.0* 
-- **minimumVersion**: Before downloading NodeJS, the installer will check the availability of NodeJS globally.
-  If a NodeJS is available globally, the *minimumVersion* parameter is the minimum version NodeJS should have.
-  If this condition is not met, a local install is performed.  
-  *Default value: 0.8.0*
+- **version**: This is the version number of NodeJS that will be downloaded and installed.
+  You can specify version constraints in the usual Composer format (for instance "~0.12" or ">0.11").
+  _Default value: *_ The latest stable version of NodeJS is installed by default.
 - **targetDir**: The target directory NodeJS will be installed in. Relative to project root.  
   *Default value: vendor/nodejs/nodejs*
 - **forceLocal** (boolean): If set to true, NodeJS will always be downloaded and installed locally, even if NodeJS

@@ -50,28 +50,25 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     public function postAutoloadDump(Event $event)
     {
         $settings = array(
-            'version' => '0.12.0',
-            'minimumVersion' => '0.8.0',
+            'version' => '*',
             'targetDir' => 'vendor/nodejs/nodejs',
             'forceLocal' => false
         );
 
-        // TODO: use versions detection.
-        //$nodeJsVersionsLister = new NodeJsVersionsLister($this->io);
-        //var_export($nodeJsVersionsLister->getList());return;
+        $nodeJsVersionMatcher = new NodeJsVersionMatcher();
 
         $extra = $event->getComposer()->getPackage()->getExtra();
 
         if (isset($extra['mouf']['nodejs'])) {
             $rootSettings = $extra['mouf']['nodejs'];
             $settings = array_merge($settings, $rootSettings);
-            $settings['version'] = ltrim($settings['version'], 'v');
-            $settings['minimumVersion'] = ltrim($settings['minimumVersion'], 'v');
             $settings['targetDir'] = trim($settings['targetDir'], '/\\');
         }
 
+        $versionConstraint = $settings['version'];
+
         $this->verboseLog("<info>NodeJS installer:</info>");
-        $this->verboseLog(" - Minimum requested version: v".$settings['minimumVersion']);
+        $this->verboseLog(" - Requested version: ".$settings['version']);
 
         $binDir = $event->getComposer()->getConfig()->get('bin-dir');
 
@@ -81,7 +78,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
         if ($settings['forceLocal']) {
             $this->verboseLog(" - Forcing local NodeJS install.");
-            $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
+            $this->installLocalVersion($nodeJsInstaller, $versionConstraint, $settings['targetDir']);
             $isLocal = true;
         } else {
             $globalVersion = $nodeJsInstaller->getNodeJsGlobalInstallVersion();
@@ -89,13 +86,15 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             if ($globalVersion !== null) {
                 $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
 
-                if (version_compare($globalVersion, $settings['minimumVersion']) === -1) {
-                    $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
+                if (!$nodeJsVersionMatcher->isVersionMatching($globalVersion, $versionConstraint)) {
+                    $this->installLocalVersion($nodeJsInstaller, $versionConstraint, $settings['targetDir']);
                     $isLocal = true;
+                } else {
+                    $this->verboseLog(" - Global NodeJS install matches constraint ".$versionConstraint);
                 }
             } else {
                 $this->verboseLog(" - No global NodeJS install found");
-                $this->installLocalVersion($nodeJsInstaller, $settings['version'], $settings['minimumVersion'], $settings['targetDir']);
+                $this->installLocalVersion($nodeJsInstaller, $versionConstraint, $settings['targetDir']);
                 $isLocal = true;
             }
         }
@@ -114,19 +113,49 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
-    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $version, $minimumVersion, $targetDir)
+    /**
+     * Checks local NodeJS version, performs install if needed.
+     *
+     * @param NodeJsInstaller $nodeJsInstaller
+     * @param string $versionConstraint
+     * @param string $targetDir
+     * @throws NodeJsInstallerException
+     */
+    private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir)
     {
+        $nodeJsVersionMatcher = new NodeJsVersionMatcher();
+
         $localVersion = $nodeJsInstaller->getNodeJsLocalInstallVersion();
         if ($localVersion !== null) {
             $this->verboseLog(" - Local NodeJS install found: v".$localVersion);
 
-            if (version_compare($localVersion, $minimumVersion) === -1) {
-                $nodeJsInstaller->install($version, $targetDir);
+            if (!$nodeJsVersionMatcher->isVersionMatching($localVersion, $versionConstraint)) {
+                $this->installBestPossibleLocalVersion($nodeJsInstaller, $versionConstraint, $targetDir);
+            } else {
+                $this->verboseLog(" - Local NodeJS install matches constraint ".$versionConstraint);
             }
         } else {
             $this->verboseLog(" - No local NodeJS install found");
-            $nodeJsInstaller->install($version, $targetDir);
+            $this->installBestPossibleLocalVersion($nodeJsInstaller, $versionConstraint, $targetDir);
         }
+    }
+
+    /**
+     * Installs locally the best possible NodeJS version matching $versionConstraint
+     *
+     * @param NodeJsInstaller $nodeJsInstaller
+     * @param string $versionConstraint
+     * @param string $targetDir
+     * @throws NodeJsInstallerException
+     */
+    private function installBestPossibleLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir) {
+        $nodeJsVersionsLister = new NodeJsVersionsLister($this->io);
+        $allNodeJsVersions = $nodeJsVersionsLister->getList();
+
+        $nodeJsVersionMatcher = new NodeJsVersionMatcher();
+        $bestPossibleVersion = $nodeJsVersionMatcher->findBestMatchingVersion($allNodeJsVersions, $versionConstraint);
+
+        $nodeJsInstaller->install($bestPossibleVersion, $targetDir);
     }
 
     /**
