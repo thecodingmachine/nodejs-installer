@@ -6,13 +6,13 @@
 NodeJS installer for Composer
 =============================
 
-This is an installer that will download NodeJS and NPM install them in your Composer dependencies.
+This is an installer that will download NodeJS and NPM and install them in your Composer dependencies.
 Installation is skipped if NodeJS is already available on your machine.
 
 How does it work?
 -----------------
 
-Simply include this package in your *composer.json* requirements:
+Simply include this package in your `composer.json` requirements:
 
 ```json
 {
@@ -26,8 +26,8 @@ By default, if NodeJS is not available on your computer, it will be downloaded a
 
 You should access NodeJS and NPM using the scripts created into the *vendor/bin* directory:
 
-- *vendor/bin/node* (*vendor/bin/node.bat* in Windows)
-- *vendor/bin/npm* (*vendor/bin/npm.bat* in Windows)
+- *vendor/bin/node* (*vendor/bin/node.bat* on Windows)
+- *vendor/bin/npm* (*vendor/bin/npm.bat* on Windows)
 
 Options
 -------
