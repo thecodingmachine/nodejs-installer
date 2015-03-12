@@ -17,6 +17,9 @@
         "composer-plugin-api": "~1.0.0",
         "ext-openssl": "*"
     },
+    "require-dev": {
+        "composer/composer": "*"
+    },
     "autoload": {
         "psr-4": {
             "Mouf\\NodeJsInstaller\\": "src/"
