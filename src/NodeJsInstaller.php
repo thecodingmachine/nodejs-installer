@@ -87,67 +87,27 @@ class NodeJsInstaller
         }
     }
 
-    /**
-     * @return bool True if OS is Windows.
-     */
-    private function isWindows()
-    {
-        return defined('PHP_WINDOWS_VERSION_BUILD');
-    }
-
-    /**
-     * @return bool True if OS is MacOSX.
-     */
-    private function isMacOS()
-    {
-        return PHP_OS === 'Darwin';
-    }
-
-    /**
-     * @return bool True if OS is SunOS.
-     */
-    private function isSunOS()
-    {
-        return PHP_OS === 'SunOS';
-    }
-
-    /**
-     * @return bool True if OS is Linux.
-     */
-    private function isLinux()
-    {
-        return PHP_OS === 'Linux';
-    }
-
     public function getNodeJSUrl($version)
     {
-        if ($this->isWindows() && $this->getArchitecture() == 32) {
+        if (Environment::isWindows() && Environment::getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node.exe";
-        } elseif ($this->isWindows() && $this->getArchitecture() == 64) {
+        } elseif (Environment::isWindows() && Environment::getArchitecture() == 64) {
             return "http://nodejs.org/dist/v".$version."/x64/node.exe";
-        } elseif ($this->isMacOS() && $this->getArchitecture() == 32) {
+        } elseif (Environment::isMacOS() && Environment::getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x86.tar.gz";
-        } elseif ($this->isMacOS() && $this->getArchitecture() == 64) {
+        } elseif (Environment::isMacOS() && Environment::getArchitecture() == 64) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x64.tar.gz";
-        } elseif ($this->isSunOS() && $this->getArchitecture() == 32) {
+        } elseif (Environment::isSunOS() && Environment::getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x86.tar.gz";
-        } elseif ($this->isSunOS() && $this->getArchitecture() == 64) {
+        } elseif (Environment::isSunOS() && Environment::getArchitecture() == 64) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x64.tar.gz";
-        } elseif ($this->isLinux() && $this->getArchitecture() == 32) {
+        } elseif (Environment::isLinux() && Environment::getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-linux-x86.tar.gz";
-        } elseif ($this->isLinux() && $this->getArchitecture() == 64) {
+        } elseif (Environment::isLinux() && Environment::getArchitecture() == 64) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-linux-x64.tar.gz";
         } else {
-            throw new NodeJsInstallerException('Unsupported architecture: '.PHP_OS.' - '.$this->getArchitecture().' bits');
+            throw new NodeJsInstallerException('Unsupported architecture: '.PHP_OS.' - '.Environment::getArchitecture().' bits');
         }
-    }
-
-    /**
-     * @return int Returns 32 or 64 depending on supported architecture.
-     */
-    public function getArchitecture()
-    {
-        return 8 * PHP_INT_SIZE;
     }
 
     /**
@@ -167,7 +127,6 @@ class NodeJsInstaller
 
         $fileName = 'vendor/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
 
-        // TODO: change default directory (for instance to /vendor?)
         $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $fileName);
 
         if (!file_exists($fileName)) {
@@ -183,7 +142,7 @@ class NodeJsInstaller
             throw new NodeJsInstallerException("'$targetDirectory' is not writable");
         }
 
-        if (!$this->isWindows()) {
+        if (!Environment::isWindows()) {
             // Now, if we are not in Windows, let's untar.
             $this->extractTo($fileName, $targetDirectory);
 
@@ -263,7 +222,7 @@ class NodeJsInstaller
 
         $fullTargetDir = realpath($targetDir);
 
-        if (!$this->isWindows()) {
+        if (!Environment::isWindows()) {
             $this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
             $this->createBinScript($binDir, $fullTargetDir, 'npm', $isLocal);
         } else {
@@ -345,7 +304,7 @@ class NodeJsInstaller
      */
     public function registerPath($binDir) {
         $path = getenv('PATH');
-        if ($this->isWindows()) {
+        if (Environment::isWindows()) {
             putenv('PATH='.realpath($binDir).';'.$path);
         } else {
             putenv('PATH='.realpath($binDir).':'.$path);

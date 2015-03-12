@@ -56,6 +56,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             'forceLocal' => false
         );
 
+        // TODO: use versions detection.
+        //$nodeJsVersionsLister = new NodeJsVersionsLister($this->io);
+        //var_export($nodeJsVersionsLister->getList());return;
+
         $extra = $event->getComposer()->getPackage()->getExtra();
 
         if (isset($extra['mouf']['nodejs'])) {
