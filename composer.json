@@ -35,5 +35,7 @@
 	    "mouf": {
 		      "logo": "node-js.png"
 	    }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
