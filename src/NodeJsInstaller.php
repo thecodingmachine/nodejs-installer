@@ -87,6 +87,13 @@ class NodeJsInstaller
         }
     }
 
+    /**
+     * Returns URL based on version.
+     * URL is dependent on environment
+     * @param string $version
+     * @return string
+     * @throws NodeJsInstallerException
+     */
     public function getNodeJSUrl($version)
     {
         if (Environment::isWindows() && Environment::getArchitecture() == 32) {
