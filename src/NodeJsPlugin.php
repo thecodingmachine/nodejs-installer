@@ -2,6 +2,7 @@
 namespace Mouf\NodeJsInstaller;
 
 use Composer\Composer;
+use Composer\Package\CompletePackage;
 use Composer\Script\Event;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
@@ -50,9 +51,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     public function postAutoloadDump(Event $event)
     {
         $settings = array(
-            'version' => '*',
             'targetDir' => 'vendor/nodejs/nodejs',
-            'forceLocal' => false
+            'forceLocal' => false,
+            'includeBinInPath' => false
         );
 
         $nodeJsVersionMatcher = new NodeJsVersionMatcher();
@@ -65,10 +66,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             $settings['targetDir'] = trim($settings['targetDir'], '/\\');
         }
 
-        $versionConstraint = $settings['version'];
+        $versionConstraint = $this->getMergedVersionConstraint();
 
         $this->verboseLog("<info>NodeJS installer:</info>");
-        $this->verboseLog(" - Requested version: ".$settings['version']);
+        $this->verboseLog(" - Requested version: ".$versionConstraint);
 
         $binDir = $event->getComposer()->getConfig()->get('bin-dir');
 
@@ -103,7 +104,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $nodeJsInstaller->createBinScripts($binDir, $settings['targetDir'], $isLocal);
 
         // Finally, let's register vendor/bin in the PATH.
-        $nodeJsInstaller->registerPath($binDir);
+        if ($settings['includeBinInPath']) {
+            $nodeJsInstaller->registerPath($binDir);
+        }
     }
 
     private function verboseLog($message)
@@ -132,6 +135,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             if (!$nodeJsVersionMatcher->isVersionMatching($localVersion, $versionConstraint)) {
                 $this->installBestPossibleLocalVersion($nodeJsInstaller, $versionConstraint, $targetDir);
             } else {
+                // Question: should we update to the latest version? Should we have a nodejs.lock file???
                 $this->verboseLog(" - Local NodeJS install matches constraint ".$versionConstraint);
             }
         } else {
@@ -156,6 +160,33 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $bestPossibleVersion = $nodeJsVersionMatcher->findBestMatchingVersion($allNodeJsVersions, $versionConstraint);
 
         $nodeJsInstaller->install($bestPossibleVersion, $targetDir);
+    }
+
+    /**
+     * Gets the version constraint from all included packages and merges it into one constraint.
+     */
+    private function getMergedVersionConstraint() {
+        $packagesList = $this->composer->getRepositoryManager()->getLocalRepository()
+            ->getCanonicalPackages();
+        $packagesList[] = $this->composer->getPackage();
+
+        $versions = array();
+
+        foreach ($packagesList as $package) {
+            /* @var $package PackageInterface */
+            if ($package instanceof CompletePackage) {
+                $extra = $package->getExtra();
+                if (isset($extra['mouf']['nodejs']['version'])) {
+                    $versions[] = $extra['mouf']['nodejs']['version'];
+                }
+            }
+        }
+
+        if (!empty($versions)) {
+            return implode(", ", $versions);
+        } else {
+            return "*";
+        }
     }
 
     /**

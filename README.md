@@ -50,15 +50,19 @@ A number of options are available to customize NodeJS installation:
 Available options:
 
 - **version**: This is the version number of NodeJS that will be downloaded and installed.
-  You can specify version constraints in the usual Composer format (for instance "~0.12" or ">0.11").
+  You can specify version constraints in the usual Composer format (for instance "~0.12" or ">0.11").  
   _Default value: *_ The latest stable version of NodeJS is installed by default.
 - **targetDir**: The target directory NodeJS will be installed in. Relative to project root.  
+  This option is only available in the root package.  
   *Default value: vendor/nodejs/nodejs*
 - **forceLocal** (boolean): If set to true, NodeJS will always be downloaded and installed locally, even if NodeJS
-  is already available on your computer.
+  is already available on your computer.  
+  This option is only available in the root package.  
   *Default value: false*
-
-**Note**: in the current implementation, options are only read from the "root" package.
-
-After the plugin is run in Composer, the *vendor/bin* directory is added to the PATH. Therefore, a plugin running
-after this plugin can access node and npm without specifying the full path to *vendor/bin*.
+- **includeBinInPath** (boolean): After the plugin is run in Composer, the *vendor/bin* directory can optionally be 
+  added to the PATH. This is useful if other plugins rely on "node" or "npm" being available globally on the 
+  computer. Using this option, these other plugins will automatically find the node/npm version that has been 
+  downloaded. Please note that the PATH is only set for the duration of the Composer script. Your global environment
+  is not impacted by this option.  
+  This option is only available in the root package.  
+  *Default value: false*
