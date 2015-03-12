@@ -109,6 +109,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         }
     }
 
+    /**
+     * Writes message only in verbose mode.
+     * @param string $message
+     */
     private function verboseLog($message)
     {
         if ($this->io->isVerbose()) {
