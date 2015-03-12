@@ -163,6 +163,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $nodeJsVersionMatcher = new NodeJsVersionMatcher();
         $bestPossibleVersion = $nodeJsVersionMatcher->findBestMatchingVersion($allNodeJsVersions, $versionConstraint);
 
+        if ($bestPossibleVersion === null) {
+            throw new NodeJsInstallerNodeVersionException("No NodeJS version could be found for constraint '".$versionConstraint."'");
+        }
+
         $nodeJsInstaller->install($bestPossibleVersion, $targetDir);
     }
 
