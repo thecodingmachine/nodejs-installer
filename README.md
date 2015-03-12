@@ -9,6 +9,17 @@ NodeJS installer for Composer
 This is an installer that will download NodeJS and NPM and install them in your Composer dependencies.
 Installation is skipped if NodeJS is already available on your machine.
 
+Why?
+----
+
+NodeJS is increasingly becoming a part of the tool-chain of modern web developers. Tools like Bower, Grunt, Gulp... are
+used everyday to build applications. For the PHP developer, this means PHP projects have build dependencies on NodeJS
+or Bower / NPM packages. The NodeJS-installer attempts to bridge the gap between NodeJS and PHP by making NodeJS easily 
+installable as a Composer dependency.
+
+Building on this package, other packages like [koala-framework/composer-extra-assets](https://github.com/koala-framework/composer-extra-assets)
+can be used to automatically fetch Bower / NPM packages, run Gulp / Grunt tasks, etc...
+
 How does it work?
 -----------------
 
