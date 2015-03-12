@@ -70,7 +70,7 @@ class NodeJsInstaller
 
         ob_start();
 
-        if (!$this->isWindows()) {
+        if (!Environment::isWindows()) {
             $version = exec("vendor/bin/node -v 2>&1", $output, $returnCode);
         } else {
             $version = exec("vendor\\bin\\node -v 2>&1", $output, $returnCode);

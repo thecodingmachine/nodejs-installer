@@ -22,6 +22,11 @@
             "Mouf\\NodeJsInstaller\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Mouf\\NodeJsInstaller\\": "tests/"
+        }
+    },
     "extra" : {
     	"class": ["Mouf\\NodeJsInstaller\\NodeJsPlugin"],
 	    "mouf": {
