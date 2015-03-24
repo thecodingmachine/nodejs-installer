@@ -228,6 +228,7 @@ class NodeJsInstaller
         }
 
         $fullTargetDir = realpath($targetDir);
+        $binDir = realpath($binDir);
 
         if (!Environment::isWindows()) {
             $this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
