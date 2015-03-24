@@ -28,7 +28,7 @@ Simply include this package in your `composer.json` requirements:
 ```json
 {
     "require": {
-        "mouf/nodejs-installer": "~1.0",
+        "mouf/nodejs-installer": "~1.0"
     }
 }
 ```
@@ -49,16 +49,16 @@ A number of options are available to customize NodeJS installation:
 ```json
 {
     "require": {
-        "mouf/nodejs-installer": "~1.0",
+        "mouf/nodejs-installer": "~1.0"
     },
     "extra": {
-    	"mouf": {
-    		"nodejs": {
-    			"version": "~0.12",
+        "mouf": {
+            "nodejs": {
+                "version": "~0.12",
                 "targetDir": "vendor/nodejs/nodejs",
                 "forceLocal": false
-    		}
-    	}
+            }
+        }
     }
 }
 ```
