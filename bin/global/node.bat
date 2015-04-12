@@ -1,3 +1,3 @@
 @ECHO OFF
 
-node %%*
+%s %%*

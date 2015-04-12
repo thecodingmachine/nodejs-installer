@@ -52,6 +52,30 @@ class NodeJsInstaller
     }
 
     /**
+     * Returns the full path to NodeJS global install (if available).
+     */
+    public function getNodeJsGlobalInstallPath() {
+        $pathToNodeJS = $this->getGlobalInstallPath("nodejs");
+        if (!$pathToNodeJS) {
+            $pathToNodeJS = $this->getGlobalInstallPath("node");
+        }
+        return $pathToNodeJS;
+    }
+
+    /**
+     * Returns the full install path to a command
+     * @param string $command
+     */
+    public function getGlobalInstallPath($command) {
+        if (Environment::isWindows()) {
+            $which = "where";
+        } else {
+            $which = "which";
+        }
+        return trim(shell_exec($which." ".escapeshellarg($command)), "\n\r");
+    }
+
+    /**
      * Checks if NodeJS is installed locally.
      * If yes, will return the version number.
      * If no, will return null.
@@ -251,7 +275,15 @@ class NodeJsInstaller
     private function createBinScript($binDir, $fullTargetDir, $scriptName, $isLocal)
     {
         $content = file_get_contents(__DIR__.'/../bin/'.($isLocal ? "local/" : "global/").$scriptName);
-        $path = $this->makePathRelative($fullTargetDir, $binDir);
+        if ($isLocal) {
+            $path = $this->makePathRelative($fullTargetDir, $binDir);
+        } else {
+            if ($scriptName == "node") {
+                $path = $this->getNodeJsGlobalInstallPath();
+            } else {
+                $path = $this->getGlobalInstallPath($scriptName);
+            }
+        }
         file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
         chmod($binDir.'/'.$scriptName, 0755);
     }
