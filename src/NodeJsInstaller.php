@@ -54,11 +54,13 @@ class NodeJsInstaller
     /**
      * Returns the full path to NodeJS global install (if available).
      */
-    public function getNodeJsGlobalInstallPath() {
+    public function getNodeJsGlobalInstallPath()
+    {
         $pathToNodeJS = $this->getGlobalInstallPath("nodejs");
         if (!$pathToNodeJS) {
             $pathToNodeJS = $this->getGlobalInstallPath("node");
         }
+
         return $pathToNodeJS;
     }
 
@@ -66,12 +68,14 @@ class NodeJsInstaller
      * Returns the full install path to a command
      * @param string $command
      */
-    public function getGlobalInstallPath($command) {
+    public function getGlobalInstallPath($command)
+    {
         if (Environment::isWindows()) {
             $which = "where";
         } else {
             $which = "which";
         }
+
         return trim(shell_exec($which." ".escapeshellarg($command)), "\n\r");
     }
 
@@ -114,7 +118,7 @@ class NodeJsInstaller
     /**
      * Returns URL based on version.
      * URL is dependent on environment
-     * @param string $version
+     * @param  string                   $version
      * @return string
      * @throws NodeJsInstallerException
      */
@@ -342,7 +346,8 @@ class NodeJsInstaller
      *
      * @param string $binDir
      */
-    public function registerPath($binDir) {
+    public function registerPath($binDir)
+    {
         $path = getenv('PATH');
         if (Environment::isWindows()) {
             putenv('PATH='.realpath($binDir).';'.$path);

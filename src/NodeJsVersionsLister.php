@@ -1,5 +1,6 @@
 <?php
 namespace Mouf\NodeJsInstaller;
+
 use Composer\IO\IOInterface;
 use Composer\Util\RemoteFilesystem;
 
@@ -23,7 +24,8 @@ class NodeJsVersionsLister
         $this->rfs = new RemoteFilesystem($io);
     }
 
-    public function getList() {
+    public function getList()
+    {
         // Let's download the content of HTML page https://nodejs.org/dist/
         $html = $this->rfs->getContents(parse_url(self::NODEJS_DIST_URL, PHP_URL_HOST), self::NODEJS_DIST_URL, false);
 

@@ -4,7 +4,8 @@ namespace Mouf\NodeJsInstaller;
 /**
  * A class that returns environment related informations (OS, architecture, etc...)
  */
-class Environment {
+class Environment
+{
     /**
      * @return bool True if OS is Windows.
      */

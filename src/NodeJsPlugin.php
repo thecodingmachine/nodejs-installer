@@ -53,7 +53,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $settings = array(
             'targetDir' => 'vendor/nodejs/nodejs',
             'forceLocal' => false,
-            'includeBinInPath' => false
+            'includeBinInPath' => false,
         );
 
         $nodeJsVersionMatcher = new NodeJsVersionMatcher();
@@ -123,9 +123,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     /**
      * Checks local NodeJS version, performs install if needed.
      *
-     * @param NodeJsInstaller $nodeJsInstaller
-     * @param string $versionConstraint
-     * @param string $targetDir
+     * @param  NodeJsInstaller          $nodeJsInstaller
+     * @param  string                   $versionConstraint
+     * @param  string                   $targetDir
      * @throws NodeJsInstallerException
      */
     private function installLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir)
@@ -151,12 +151,13 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     /**
      * Installs locally the best possible NodeJS version matching $versionConstraint
      *
-     * @param NodeJsInstaller $nodeJsInstaller
-     * @param string $versionConstraint
-     * @param string $targetDir
+     * @param  NodeJsInstaller          $nodeJsInstaller
+     * @param  string                   $versionConstraint
+     * @param  string                   $targetDir
      * @throws NodeJsInstallerException
      */
-    private function installBestPossibleLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir) {
+    private function installBestPossibleLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir)
+    {
         $nodeJsVersionsLister = new NodeJsVersionsLister($this->io);
         $allNodeJsVersions = $nodeJsVersionsLister->getList();
 
@@ -173,7 +174,8 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     /**
      * Gets the version constraint from all included packages and merges it into one constraint.
      */
-    private function getMergedVersionConstraint() {
+    private function getMergedVersionConstraint()
+    {
         $packagesList = $this->composer->getRepositoryManager()->getLocalRepository()
             ->getCanonicalPackages();
         $packagesList[] = $this->composer->getPackage();
