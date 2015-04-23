@@ -56,6 +56,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             'includeBinInPath' => false,
         );
 
+        if (!class_exists(__NAMESPACE__ . '\\NodeJsVersionMatcher')) {
+            //The package is being uninstalled
+            return;
+        }
         $nodeJsVersionMatcher = new NodeJsVersionMatcher();
 
         $extra = $event->getComposer()->getPackage()->getExtra();
