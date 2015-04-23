@@ -56,7 +56,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             'includeBinInPath' => false,
         );
 
-        if (!class_exists('NodeJsVersionMatcher')) {
+        if (!class_exists('Mouf\\NodeJsInstaller\\NodeJsVersionMatcher')) {
             //The package is being uninstalled
             return;
         }
