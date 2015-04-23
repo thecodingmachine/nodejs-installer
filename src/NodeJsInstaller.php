@@ -71,11 +71,12 @@ class NodeJsInstaller
     public function getGlobalInstallPath($command)
     {
         if (Environment::isWindows()) {
-        	$result = trim(shell_exec("where /F ".escapeshellarg($command)), "\n\r");
-            
-        	// "Where" can return several lines.
-        	$lines = explode("\n", $result);
-        	return $lines[0];
+            $result = trim(shell_exec("where /F ".escapeshellarg($command)), "\n\r");
+
+            // "Where" can return several lines.
+            $lines = explode("\n", $result);
+
+            return $lines[0];
         } else {
             // We want to get output from stdout, not from stderr.
             // Therefore, we use proc_open.
@@ -97,7 +98,7 @@ class NodeJsInstaller
 
             proc_close($process);
 
-        	return trim($stdout, "\n\r");
+            return trim($stdout, "\n\r");
         }
     }
 
