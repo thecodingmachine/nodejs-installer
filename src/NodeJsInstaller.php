@@ -77,7 +77,27 @@ class NodeJsInstaller
         	$lines = explode("\n", $result);
         	return $lines[0];
         } else {
-        	return trim(shell_exec("which ".escapeshellarg($command)), "\n\r");
+            // We want to get output from stdout, not from stderr.
+            // Therefore, we use proc_open.
+            $descriptorspec = array(
+                0 => array("pipe", "r"),  // stdin
+                1 => array("pipe", "w"),  // stdout
+                2 => array("pipe", "w"),  // stderr
+            );
+            $pipes = array();
+
+            $process = proc_open("which ".escapeshellarg($command), $descriptorspec, $pipes);
+
+            $stdout = stream_get_contents($pipes[1]);
+            fclose($pipes[1]);
+
+            // Let's ignore stderr (it is possible we do not find anything and depending on the OS, stderr will
+            // return things or not)
+            fclose($pipes[2]);
+
+            proc_close($process);
+
+        	return trim($stdout, "\n\r");
         }
     }
 
