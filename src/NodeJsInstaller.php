@@ -71,12 +71,14 @@ class NodeJsInstaller
     public function getGlobalInstallPath($command)
     {
         if (Environment::isWindows()) {
-            $which = "where";
+        	$result = trim(shell_exec("where /F ".escapeshellarg($command)), "\n\r");
+            
+        	// "Where" can return several lines.
+        	$lines = explode("\n", $result);
+        	return $lines[0];
         } else {
-            $which = "which";
+        	return trim(shell_exec("which ".escapeshellarg($command)), "\n\r");
         }
-
-        return trim(shell_exec($which." ".escapeshellarg($command)), "\n\r");
     }
 
     /**
@@ -259,11 +261,11 @@ class NodeJsInstaller
         $binDir = realpath($binDir);
 
         if (!Environment::isWindows()) {
-            $this->createBinScript($binDir, $fullTargetDir, 'node', $isLocal);
-            $this->createBinScript($binDir, $fullTargetDir, 'npm', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'node', 'node', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'npm', 'npm', $isLocal);
         } else {
-            $this->createBinScript($binDir, $fullTargetDir, 'node.bat', $isLocal);
-            $this->createBinScript($binDir, $fullTargetDir, 'npm.bat', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'node.bat', 'node', $isLocal);
+            $this->createBinScript($binDir, $fullTargetDir, 'npm.bat', 'npm', $isLocal);
         }
 
         chdir($cwd);
@@ -276,7 +278,7 @@ class NodeJsInstaller
      * @param string $scriptName
      * @param bool   $isLocal
      */
-    private function createBinScript($binDir, $fullTargetDir, $scriptName, $isLocal)
+    private function createBinScript($binDir, $fullTargetDir, $scriptName, $target, $isLocal)
     {
         $content = file_get_contents(__DIR__.'/../bin/'.($isLocal ? "local/" : "global/").$scriptName);
         if ($isLocal) {
@@ -285,9 +287,10 @@ class NodeJsInstaller
             if ($scriptName == "node") {
                 $path = $this->getNodeJsGlobalInstallPath();
             } else {
-                $path = $this->getGlobalInstallPath($scriptName);
+                $path = $this->getGlobalInstallPath($target);
             }
         }
+
         file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
         chmod($binDir.'/'.$scriptName, 0755);
     }
