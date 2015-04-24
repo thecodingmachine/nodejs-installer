@@ -7,7 +7,6 @@ use Composer\Script\Event;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
-use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 
 /**
@@ -41,10 +40,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     {
         return array(
             'post-install-cmd' => array(
-                array('onPostUpdateInstall', -1)
+                array('onPostUpdateInstall', -1),
             ),
             'post-update-cmd' => array(
-                array('onPostUpdateInstall', -1)
+                array('onPostUpdateInstall', -1),
             ),
         );
     }
@@ -73,6 +72,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         if (!class_exists(__NAMESPACE__.'\\NodeJsVersionMatcher')) {
             //The package is being uninstalled
             $this->onUninstall($binDir, $settings['targetDir']);
+
             return;
         }
 
@@ -213,7 +213,8 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
      * Uninstalls NodeJS.
      * Note: other classes cannot be loaded here since the package has already been removed.
      */
-    private function onUninstall($binDir, $targetDir) {
+    private function onUninstall($binDir, $targetDir)
+    {
         $fileSystem = new Filesystem();
 
         if (file_exists($targetDir)) {
