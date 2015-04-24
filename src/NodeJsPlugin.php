@@ -7,6 +7,7 @@ use Composer\Script\Event;
 use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
+use Composer\Script\ScriptEvents;
 use Composer\Util\Filesystem;
 
 /**
@@ -39,10 +40,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            'post-install-cmd' => array(
+            ScriptEvents::POST_INSTALL_CMD => array(
                 array('onPostUpdateInstall', -1),
             ),
-            'post-update-cmd' => array(
+            ScriptEvents::POST_UPDATE_CMD => array(
                 array('onPostUpdateInstall', -1),
             ),
         );
