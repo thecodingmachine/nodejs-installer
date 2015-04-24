@@ -235,7 +235,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
         // Now, let's remove the links
         foreach (["node", "npm", "node.bat", "npm.bat"] as $file) {
-            $realFile = $binDir.DS.$file;
+            $realFile = $binDir.DIRECTORY_SEPARATOR.$file;
             if (file_exists($realFile)) {
                 $fileSystem->remove($realFile);
             }
