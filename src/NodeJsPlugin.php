@@ -210,30 +210,27 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function uninstall(InstalledRepositoryInterface $repo, PackageInterface $package)
-    {
-        parent::uninstall($repo, $package);
-    }
-
-    /**
      * Uninstalls NodeJS.
      * Note: other classes cannot be loaded here since the package has already been removed.
      */
     private function onUninstall($binDir, $targetDir) {
         $fileSystem = new Filesystem();
 
-        // Let's remove target directory
-        $fileSystem->remove($targetDir);
+        if (file_exists($targetDir)) {
+            $this->verboseLog("Removing NodeJS local install");
 
-        $vendorNodeDir = dirname($targetDir);
+            // Let's remove target directory
+            $fileSystem->remove($targetDir);
 
-        if ($fileSystem->isDirEmpty($vendorNodeDir)) {
-            $fileSystem->remove($vendorNodeDir);
+            $vendorNodeDir = dirname($targetDir);
+
+            if ($fileSystem->isDirEmpty($vendorNodeDir)) {
+                $fileSystem->remove($vendorNodeDir);
+            }
         }
 
         // Now, let's remove the links
+        $this->verboseLog("Removing NodeJS and NPM links from Composer bin directory");
         foreach (["node", "npm", "node.bat", "npm.bat"] as $file) {
             $realFile = $binDir.DIRECTORY_SEPARATOR.$file;
             if (file_exists($realFile)) {
