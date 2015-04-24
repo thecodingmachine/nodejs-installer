@@ -8,6 +8,7 @@ use Composer\EventDispatcher\EventSubscriberInterface;
 use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
+use Composer\Util\Filesystem;
 
 /**
  * This class is the entry point for the NodeJs plugin.
@@ -39,28 +40,25 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            ScriptEvents::POST_AUTOLOAD_DUMP => array(
-                array('postAutoloadDump', 0),
+            ScriptEvents::POST_INSTALL_CMD => array(
+                array('onPostUpdateInstall', -1),
+            ),
+            ScriptEvents::POST_UPDATE_CMD => array(
+                array('onPostUpdateInstall', -1),
             ),
         );
     }
 
     /**
-     * Script callback; Acted on after autoload dump.
+     * Script callback; Acted on after install or update.
      */
-    public function postAutoloadDump(Event $event)
+    public function onPostUpdateInstall(Event $event)
     {
         $settings = array(
             'targetDir' => 'vendor/nodejs/nodejs',
             'forceLocal' => false,
             'includeBinInPath' => false,
         );
-
-        if (!class_exists(__NAMESPACE__.'\\NodeJsVersionMatcher')) {
-            //The package is being uninstalled
-            return;
-        }
-        $nodeJsVersionMatcher = new NodeJsVersionMatcher();
 
         $extra = $event->getComposer()->getPackage()->getExtra();
 
@@ -70,12 +68,21 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             $settings['targetDir'] = trim($settings['targetDir'], '/\\');
         }
 
+        $binDir = $event->getComposer()->getConfig()->get('bin-dir');
+
+        if (!class_exists(__NAMESPACE__.'\\NodeJsVersionMatcher')) {
+            //The package is being uninstalled
+            $this->onUninstall($binDir, $settings['targetDir']);
+
+            return;
+        }
+
+        $nodeJsVersionMatcher = new NodeJsVersionMatcher();
+
         $versionConstraint = $this->getMergedVersionConstraint();
 
         $this->verboseLog("<info>NodeJS installer:</info>");
         $this->verboseLog(" - Requested version: ".$versionConstraint);
-
-        $binDir = $event->getComposer()->getConfig()->get('bin-dir');
 
         $nodeJsInstaller = new NodeJsInstaller($this->io);
 
@@ -204,10 +211,33 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * {@inheritDoc}
+     * Uninstalls NodeJS.
+     * Note: other classes cannot be loaded here since the package has already been removed.
      */
-    public function uninstall(InstalledRepositoryInterface $repo, PackageInterface $package)
+    private function onUninstall($binDir, $targetDir)
     {
-        parent::uninstall($repo, $package);
+        $fileSystem = new Filesystem();
+
+        if (file_exists($targetDir)) {
+            $this->verboseLog("Removing NodeJS local install");
+
+            // Let's remove target directory
+            $fileSystem->remove($targetDir);
+
+            $vendorNodeDir = dirname($targetDir);
+
+            if ($fileSystem->isDirEmpty($vendorNodeDir)) {
+                $fileSystem->remove($vendorNodeDir);
+            }
+        }
+
+        // Now, let's remove the links
+        $this->verboseLog("Removing NodeJS and NPM links from Composer bin directory");
+        foreach (["node", "npm", "node.bat", "npm.bat"] as $file) {
+            $realFile = $binDir.DIRECTORY_SEPARATOR.$file;
+            if (file_exists($realFile)) {
+                $fileSystem->remove($realFile);
+            }
+        }
     }
 }
