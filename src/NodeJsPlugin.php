@@ -41,10 +41,10 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     {
         return array(
             ScriptEvents::POST_INSTALL_CMD => array(
-                array('onPostUpdateInstall', -1),
+                array('onPostUpdateInstall', 1),
             ),
             ScriptEvents::POST_UPDATE_CMD => array(
-                array('onPostUpdateInstall', -1),
+                array('onPostUpdateInstall', 1),
             ),
         );
     }
