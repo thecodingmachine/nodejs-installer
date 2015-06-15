@@ -97,8 +97,13 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
             if ($globalVersion !== null) {
                 $this->verboseLog(" - Global NodeJS install found: v".$globalVersion);
+                $npmPath = $nodeJsInstaller->getGlobalInstallPath('npm');
 
-                if (!$nodeJsVersionMatcher->isVersionMatching($globalVersion, $versionConstraint)) {
+                if (!$npmPath) {
+                    $this->verboseLog(" - No NPM install found");
+                    $this->installLocalVersion($nodeJsInstaller, $versionConstraint, $settings['targetDir']);
+                    $isLocal = true;
+                } elseif (!$nodeJsVersionMatcher->isVersionMatching($globalVersion, $versionConstraint)) {
                     $this->installLocalVersion($nodeJsInstaller, $versionConstraint, $settings['targetDir']);
                     $isLocal = true;
                 } else {
