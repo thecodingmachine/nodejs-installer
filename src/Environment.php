@@ -39,6 +39,14 @@ class Environment
     }
 
     /**
+     * @return bool True if processor is Arm.
+     */
+    public static function isArm()
+    {
+        return strpos(strtolower(php_uname("m"), "arm")) === 0;
+    }
+
+    /**
      * @return int Returns 32 or 64 depending on supported architecture.
      */
     public static function getArchitecture()

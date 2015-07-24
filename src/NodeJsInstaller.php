@@ -159,6 +159,8 @@ class NodeJsInstaller
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x86.tar.gz";
         } elseif (Environment::isSunOS() && Environment::getArchitecture() == 64) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x64.tar.gz";
+        } elseif (Environment::isLinux() && Environment::isArm()) {
+            throw new NodeJsInstallerException('NodeJS-installer cannot install Node on computers with ARM processors. Please install NodeJS globally on your machine first, then run composer again.');
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 32) {
             return "http://nodejs.org/dist/v".$version."/node-v".$version."-linux-x86.tar.gz";
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 64) {
