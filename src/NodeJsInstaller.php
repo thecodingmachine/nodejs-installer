@@ -148,23 +148,23 @@ class NodeJsInstaller
     public function getNodeJSUrl($version)
     {
         if (Environment::isWindows() && Environment::getArchitecture() == 32) {
-            return "http://nodejs.org/dist/v".$version."/node.exe";
+            return "https://nodejs.org/dist/v".$version."/node.exe";
         } elseif (Environment::isWindows() && Environment::getArchitecture() == 64) {
-            return "http://nodejs.org/dist/v".$version."/x64/node.exe";
+            return "https://nodejs.org/dist/v".$version."/x64/node.exe";
         } elseif (Environment::isMacOS() && Environment::getArchitecture() == 32) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x86.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x86.tar.gz";
         } elseif (Environment::isMacOS() && Environment::getArchitecture() == 64) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x64.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x64.tar.gz";
         } elseif (Environment::isSunOS() && Environment::getArchitecture() == 32) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x86.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x86.tar.gz";
         } elseif (Environment::isSunOS() && Environment::getArchitecture() == 64) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x64.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x64.tar.gz";
         } elseif (Environment::isLinux() && Environment::isArm()) {
             throw new NodeJsInstallerException('NodeJS-installer cannot install Node on computers with ARM processors. Please install NodeJS globally on your machine first, then run composer again.');
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 32) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-linux-x86.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-x86.tar.gz";
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 64) {
-            return "http://nodejs.org/dist/v".$version."/node-v".$version."-linux-x64.tar.gz";
+            return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-x64.tar.gz";
         } else {
             throw new NodeJsInstallerException('Unsupported architecture: '.PHP_OS.' - '.Environment::getArchitecture().' bits');
         }
@@ -213,7 +213,7 @@ class NodeJsInstaller
             rename($fileName, $targetDirectory.'/'.basename($fileName));
 
             // We have to download the latest available version in a bin for Windows, then upgrade it:
-            $url = "http://nodejs.org/dist/npm/npm-1.4.12.zip";
+            $url = "https://nodejs.org/dist/npm/npm-1.4.12.zip";
             $npmFileName = "vendor/npm-1.4.12.zip";
             $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $npmFileName);
 
