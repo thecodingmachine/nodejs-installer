@@ -47,6 +47,22 @@ class Environment
     }
 
     /**
+     * @return bool True if processor is Armv7l.
+     */
+    public static function isArmV7l()
+    {
+        return php_uname("m") === 'armv7l';
+    }
+
+    /**
+     * @return bool True if processor is Armv6l.
+     */
+    public static function isArmV6l()
+    {
+        return php_uname("m") === 'armv6l';
+    }
+
+    /**
      * @return int Returns 32 or 64 depending on supported architecture.
      */
     public static function getArchitecture()

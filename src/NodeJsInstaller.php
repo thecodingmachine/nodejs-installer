@@ -168,7 +168,19 @@ class NodeJsInstaller
         } elseif (Environment::isSunOS() && Environment::getArchitecture() == 64) {
             return "https://nodejs.org/dist/v".$version."/node-v".$version."-sunos-x64.tar.gz";
         } elseif (Environment::isLinux() && Environment::isArm()) {
-            throw new NodeJsInstallerException('NodeJS-installer cannot install Node on computers with ARM processors. Please install NodeJS globally on your machine first, then run composer again.');
+            if (version_compare($version, '4.0.0') >= 0) {
+                if (Environment::isArmV6l()) {
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-armv6l.tar.gz";
+                } elseif (Environment::isArmV7l()) {
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-armv7l.tar.gz";
+                } elseif (Environment::getArchitecture() == 64) {
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-arm64.tar.gz";
+                } else {
+                    throw new NodeJsInstallerException('NodeJS-installer cannot install Node on computers with ARM 32bits processors that are not v6l or v7l. Please install NodeJS globally on your machine first, then run composer again.');
+                }
+            } else {
+                throw new NodeJsInstallerException('NodeJS-installer cannot install Node <4.0 on computers with ARM processors. Please install NodeJS globally on your machine first, then run composer again, or consider installing a version of NodeJS >=4.0.');
+            }
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 32) {
             return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-x86.tar.gz";
         } elseif (Environment::isLinux() && Environment::getArchitecture() == 64) {
