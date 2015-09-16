@@ -148,9 +148,17 @@ class NodeJsInstaller
     public function getNodeJSUrl($version)
     {
         if (Environment::isWindows() && Environment::getArchitecture() == 32) {
-            return "https://nodejs.org/dist/v".$version."/node.exe";
+            if (version_compare($version, '4.0.0') >= 0) {
+                return "https://nodejs.org/dist/v".$version."/win-x86/node.exe";
+            } else {
+                return "https://nodejs.org/dist/v".$version."/node.exe";
+            }
         } elseif (Environment::isWindows() && Environment::getArchitecture() == 64) {
-            return "https://nodejs.org/dist/v".$version."/x64/node.exe";
+            if (version_compare($version, '4.0.0') >= 0) {
+                return "https://nodejs.org/dist/v" . $version . "/win-x64/node.exe";
+            } else {
+                return "https://nodejs.org/dist/v" . $version . "/x64/node.exe";
+            }
         } elseif (Environment::isMacOS() && Environment::getArchitecture() == 32) {
             return "https://nodejs.org/dist/v".$version."/node-v".$version."-darwin-x86.tar.gz";
         } elseif (Environment::isMacOS() && Environment::getArchitecture() == 64) {
