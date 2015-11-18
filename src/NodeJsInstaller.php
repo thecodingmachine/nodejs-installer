@@ -111,7 +111,7 @@ class NodeJsInstaller
      *
      * @return null|string
      */
-    public function getNodeJsLocalInstallVersion()
+    public function getNodeJsLocalInstallVersion($binDir)
     {
         $returnCode = 0;
         $output = "";
@@ -121,11 +121,7 @@ class NodeJsInstaller
 
         ob_start();
 
-        if (!Environment::isWindows()) {
-            $version = exec("vendor/bin/node -v 2>&1", $output, $returnCode);
-        } else {
-            $version = exec("vendor\\bin\\node -v 2>&1", $output, $returnCode);
-        }
+        $version = exec($binDir.DIRECTORY_SEPARATOR.'node -v 2>&1', $output, $returnCode);
 
         ob_end_clean();
 
@@ -332,7 +328,14 @@ class NodeJsInstaller
             } else {
                 $path = $this->getGlobalInstallPath($target);
             }
+
+            if (strpos($path, $binDir) === 0) {
+                // we found the local installation that already exists.
+
+                return;
+            }
         }
+
 
         file_put_contents($binDir.'/'.$scriptName, sprintf($content, $path));
         chmod($binDir.'/'.$scriptName, 0755);
