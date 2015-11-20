@@ -1,0 +1,20 @@
+{
+  "containers": [
+    {
+      "prettyName": "php 7.0-rc-4",
+      "image": "dockunit\/prebuilt-images:php-mysql-phpunit-7.0-rc-4-fpm",
+      "testCommand": "phpunit",
+      "beforeScripts": [
+        "composer install"
+      ]
+    },
+    {
+      "prettyName": "php 5.6",
+      "image": "dockunit\/prebuilt-images:php-mysql-phpunit-5.6-fpm",
+      "testCommand": "phpunit",
+      "beforeScripts": [
+        "composer install"
+      ]
+    }
+  ]
+}
