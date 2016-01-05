@@ -2,6 +2,7 @@
 namespace Mouf\NodeJsInstaller;
 
 use Composer\Composer;
+use Composer\Package\AliasPackage;
 use Composer\Package\CompletePackage;
 use Composer\Script\Event;
 use Composer\EventDispatcher\EventSubscriberInterface;
@@ -200,7 +201,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $versions = array();
 
         foreach ($packagesList as $package) {
-            /* @var $package PackageInterface */
+            if ($package instanceof AliasPackage) {
+                $package = $package->getAliasOf();
+            }
             if ($package instanceof CompletePackage) {
                 $extra = $package->getExtra();
                 if (isset($extra['mouf']['nodejs']['version'])) {
