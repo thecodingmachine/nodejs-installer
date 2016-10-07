@@ -166,11 +166,11 @@ class NodeJsInstaller
         } elseif (Environment::isLinux() && Environment::isArm()) {
             if (version_compare($version, '4.0.0') >= 0) {
                 if (Environment::isArmV6l()) {
-                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-armv6l.tar.gz";
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-armv6l.tar.gz";
                 } elseif (Environment::isArmV7l()) {
-                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-armv7l.tar.gz";
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-armv7l.tar.gz";
                 } elseif (Environment::getArchitecture() == 64) {
-                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-arm64.tar.gz";
+                    return "https://nodejs.org/dist/v".$version."/node-v".$version."-linux-arm64.tar.gz";
                 } else {
                     throw new NodeJsInstallerException('NodeJS-installer cannot install Node on computers with ARM 32bits processors that are not v6l or v7l. Please install NodeJS globally on your machine first, then run composer again.');
                 }
