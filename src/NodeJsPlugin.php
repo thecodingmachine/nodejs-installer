@@ -22,6 +22,8 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 
     protected $composer;
 
+    const DOWNLOAD_NODEJS_EVENT = 'download-nodejs';
+
     /**
      * @var IOInterface
      */
@@ -47,6 +49,9 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             ScriptEvents::POST_UPDATE_CMD => array(
                 array('onPostUpdateInstall', 1),
             ),
+            self::DOWNLOAD_NODEJS_EVENT => array(
+                array('onPostUpdateInstall', 1)
+            )
         );
     }
 
