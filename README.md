@@ -82,3 +82,24 @@ Available options:
   is not impacted by this option.  
   This option is only available in the root package.  
   *Default value: false*
+
+
+Custom script
+-------------
+
+The installer listens to the following composer scripts to be launched:
+```
+{
+    "post-install-cmd": {
+        // ...
+    },
+    "post-update-cmd": {
+        // ...
+    }
+}
+```
+
+If you need to launch the installer manually, you can run the following command:
+```
+$ composer run-script download-nodejs
+```
