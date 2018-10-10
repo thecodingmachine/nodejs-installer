@@ -1,7 +1,7 @@
 <?php
 namespace Mouf\NodeJsInstaller;
 
-class NodeJsVersionMatcherTest extends \PHPUnit_Framework_TestCase
+class NodeJsVersionMatcherTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testIsVersionMatching()

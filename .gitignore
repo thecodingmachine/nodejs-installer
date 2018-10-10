@@ -1,3 +1,5 @@
 *~
 ._.DS_Store
 .DS_Store
+/vendor/*
+!/vendor/.gitkeep
