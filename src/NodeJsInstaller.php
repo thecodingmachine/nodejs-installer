@@ -238,6 +238,11 @@ class NodeJsInstaller
             unlink($npmFileName);
 
             // Let's update NPM
+            $highestNpmVersion = "latest";
+            if ($version < 10) {
+                $highestNpmVersion = "6.14.8";
+            }
+
             // 1- Update PATH to run npm.
             $path = getenv('PATH');
             $newPath = realpath($targetDirectory).";".$path;
@@ -248,7 +253,7 @@ class NodeJsInstaller
             chdir($targetDirectory);
 
             $returnCode = 0;
-            passthru("npm update npm", $returnCode);
+            passthru("npm update npm@{$highestNpmVersion}", $returnCode);
             if ($returnCode !== 0) {
                 throw new NodeJsInstallerException("An error occurred while updating NPM to latest version.");
             }
