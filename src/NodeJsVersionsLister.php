@@ -1,6 +1,7 @@
 <?php
 namespace Mouf\NodeJsInstaller;
 
+use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\RemoteFilesystem;
 
@@ -18,10 +19,10 @@ class NodeJsVersionsLister
 
     const NODEJS_DIST_URL = "https://nodejs.org/dist/";
 
-    public function __construct(IOInterface $io)
+    public function __construct(IOInterface $io, Composer $composer)
     {
         $this->io = $io;
-        $this->rfs = new RemoteFilesystem($io);
+        $this->rfs = new RemoteFilesystem($io, $composer->getConfig());
     }
 
     public function getList()
