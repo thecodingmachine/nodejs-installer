@@ -1,6 +1,7 @@
 <?php
 namespace Mouf\NodeJsInstaller;
 
+use Composer\Composer;
 use Composer\IO\IOInterface;
 use Composer\Util\RemoteFilesystem;
 
@@ -14,10 +15,10 @@ class NodeJsInstaller
 
     protected $rfs;
 
-    public function __construct(IOInterface $io)
+    public function __construct(IOInterface $io, Composer $composer)
     {
         $this->io = $io;
-        $this->rfs = new RemoteFilesystem($io);
+        $this->rfs = new RemoteFilesystem($io, $composer->getConfig());
     }
 
     /**
@@ -199,7 +200,6 @@ class NodeJsInstaller
         $this->io->write("  Downloading from $url");
 
         $cwd = getcwd();
-        chdir(__DIR__.'/../../../../');
 
         $fileName = 'vendor/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
 
@@ -291,9 +291,6 @@ class NodeJsInstaller
 
     public function createBinScripts($binDir, $targetDir, $isLocal)
     {
-        $cwd = getcwd();
-        chdir(__DIR__.'/../../../../');
-
         if (!file_exists($binDir)) {
             $result = mkdir($binDir, 0775, true);
             if ($result === false) {
@@ -311,8 +308,6 @@ class NodeJsInstaller
             $this->createBinScript($binDir, $fullTargetDir, 'node.bat', 'node', $isLocal);
             $this->createBinScript($binDir, $fullTargetDir, 'npm.bat', 'npm', $isLocal);
         }
-
-        chdir($cwd);
     }
 
     /**

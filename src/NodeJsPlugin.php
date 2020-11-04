@@ -19,10 +19,13 @@ use Composer\Util\Filesystem;
  */
 class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
 {
-
-    protected $composer;
-
+    const NODEJS_TARGET_DIR = 'vendor/nodejs/nodejs';
     const DOWNLOAD_NODEJS_EVENT = 'download-nodejs';
+
+    /**
+     * @var Composer
+     */
+    protected $composer;
 
     /**
      * @var IOInterface
@@ -33,6 +36,19 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     {
         $this->composer = $composer;
         $this->io = $io;
+    }
+
+    public function deactivate(Composer $composer, IOInterface $io)
+    {
+        $binDir = $composer->getConfig()->get('bin-dir');
+        $this->onDeactivate($binDir);
+    }
+
+    public function uninstall(Composer $composer, IOInterface $io)
+    {
+        $binDir = $composer->getConfig()->get('bin-dir');
+        $targetDir = self::NODEJS_TARGET_DIR;
+        $this->onUninstall($binDir, $targetDir);
     }
 
     /**
@@ -61,7 +77,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
     public function onPostUpdateInstall(Event $event)
     {
         $settings = array(
-            'targetDir' => 'vendor/nodejs/nodejs',
+            'targetDir' => self::NODEJS_TARGET_DIR,
             'forceLocal' => false,
             'includeBinInPath' => false,
         );
@@ -90,7 +106,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
         $this->verboseLog("<info>NodeJS installer:</info>");
         $this->verboseLog(" - Requested version: ".$versionConstraint);
 
-        $nodeJsInstaller = new NodeJsInstaller($this->io);
+        $nodeJsInstaller = new NodeJsInstaller($this->io, $this->composer);
 
         $isLocal = false;
 
@@ -181,7 +197,7 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
      */
     private function installBestPossibleLocalVersion(NodeJsInstaller $nodeJsInstaller, $versionConstraint, $targetDir)
     {
-        $nodeJsVersionsLister = new NodeJsVersionsLister($this->io);
+        $nodeJsVersionsLister = new NodeJsVersionsLister($this->io, $this->composer);
         $allNodeJsVersions = $nodeJsVersionsLister->getList();
 
         $nodeJsVersionMatcher = new NodeJsVersionMatcher();
@@ -245,7 +261,17 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             }
         }
 
-        // Now, let's remove the links
+        $this->onDeactivate($binDir);
+    }
+
+    /**
+     * Deactivates NodeJS links.
+     */
+    private function onDeactivate($binDir)
+    {
+        $fileSystem = new Filesystem();
+
+        // Remove the links.
         $this->verboseLog("Removing NodeJS and NPM links from Composer bin directory");
         foreach (array("node", "npm", "node.bat", "npm.bat") as $file) {
             $realFile = $binDir.DIRECTORY_SEPARATOR.$file;
@@ -254,4 +280,5 @@ class NodeJsPlugin implements PluginInterface, EventSubscriberInterface
             }
         }
     }
+
 }
