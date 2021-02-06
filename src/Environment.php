@@ -43,7 +43,7 @@ class Environment
      */
     public static function isArm()
     {
-        return strpos(strtolower(php_uname("m")), "arm") === 0;
+        return (strpos(strtolower(php_uname("m")), "arm") === 0 || php_uname("m") === 'aarch64');
     }
 
     /**
