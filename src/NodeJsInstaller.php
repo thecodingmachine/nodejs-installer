@@ -279,10 +279,11 @@ class NodeJsInstaller
     {
         // Note: we cannot use PharData class because it does not keeps symbolic links.
         // Also, --strip 1 allows us to remove the first directory.
+        // --no-same-owner is used to extract the files as the current user, even if the current user is root.
 
         $output = $return_var = null;
 
-        exec("tar -xvf ".$tarGzFile." -C ".escapeshellarg($targetDir)." --strip 1", $output, $return_var);
+        exec("tar -xvf ".$tarGzFile." -C ".escapeshellarg($targetDir)." --strip 1 --no-same-owner", $output, $return_var);
 
         if ($return_var !== 0) {
             throw new NodeJsInstallerException("An error occurred while untaring NodeJS ($tarGzFile) to $targetDir");
