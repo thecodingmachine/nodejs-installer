@@ -57,6 +57,11 @@ A number of options are available to customize NodeJS installation:
                 "version": "~0.12",
                 "targetDir": "vendor/nodejs/nodejs",
                 "forceLocal": false
+            },
+            "request_options": {
+                "http": {
+                    "proxy": "http:http://example.webproxy.org"
+                }
             }
         }
     }
@@ -82,7 +87,7 @@ Available options:
   is not impacted by this option.  
   This option is only available in the root package.  
   *Default value: false*
-
+- **request_options** (array): Build context request options array. @ref https://www.php.net/manual/en/context.php
 
 Custom script
 -------------

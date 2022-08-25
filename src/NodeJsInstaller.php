@@ -193,7 +193,7 @@ class NodeJsInstaller
      * @param  string                   $targetDirectory
      * @throws NodeJsInstallerException
      */
-    public function install($version, $targetDirectory)
+    public function install($version, $targetDirectory, $progress = true, $requestOptions = array())
     {
         $this->io->write("Installing <info>NodeJS v".$version."</info>");
         $url = $this->getNodeJSUrl($version);
@@ -203,7 +203,7 @@ class NodeJsInstaller
 
         $fileName = 'vendor/'.pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_BASENAME);
 
-        $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $fileName);
+        $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $fileName, $progress, $requestOptions);
 
         if (!file_exists($fileName)) {
             throw new \UnexpectedValueException($url.' could not be saved to '.$fileName.', make sure the'
@@ -231,7 +231,7 @@ class NodeJsInstaller
             // We have to download the latest available version in a bin for Windows, then upgrade it:
             $url = "https://nodejs.org/dist/npm/npm-1.4.12.zip";
             $npmFileName = "vendor/npm-1.4.12.zip";
-            $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $npmFileName);
+            $this->rfs->copy(parse_url($url, PHP_URL_HOST), $url, $npmFileName, $progress, $requestOptions);
 
             $this->unzip($npmFileName, $targetDirectory);
 
